@@ -1,4 +1,10 @@
 import Path from 'path';
+import * as decorators from 'express-decorators';
+import {snakeCase} from 'change-case';
+
+Object.keys(decorators).forEach((key) => {
+	module.exports[snakeCase(key)] = decorators[key];
+});
 
 import {Router} from 'express';
 import {sync as glob} from 'glob';

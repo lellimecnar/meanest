@@ -9,7 +9,7 @@ Passport.use('local', new LocalStrategy({
 	}, (req, username, password, next) => {
 		User.findOne({username}, (err, user) => {
 			if (err) { return next(err); }
-			if (!user) { return next(null, false, {err: 'Invalid user'}); }
+			if (!user) { return next(null, false, {err: 'Invalid username'}); }
 
 			user.verifyPassword(password, (err, valid) => {
 				if (err) return next(err);
@@ -33,4 +33,8 @@ Passport.deserializeUser((id, next) => {
 
 export default Passport;
 
-export var authenticate = middleware(Passport.authenticate('local'));
+export var authorize = middleware((req, res, next) => {
+	if (req.isAuthenticated()) { return next(); }
+
+	res.status(401).json({err:'Not logged in'}).end();
+});

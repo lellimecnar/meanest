@@ -1,4 +1,4 @@
-import {model, plugin, pre} from 'mongoose-decorators';
+import {model, plugin} from 'mongoose-decorators';
 import bcrypt from 'mongoose-bcrypt';
 import Email from 'mongoose-type-email';
 import {omit} from 'lodash';

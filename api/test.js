@@ -1,4 +1,5 @@
-import {controller, get, param} from 'express-decorators';
+import {controller, get, param} from '~/config/api';
+import {authorize} from '~/config/auth';
 
 @controller('/test')
 export default class Test {
@@ -15,6 +16,7 @@ export default class Test {
 	}
 
 	@get('/thing/:id(\\d+)')
+	@authorize
 	get_some_thing(req, res, next) {
 		res.json({val: parseInt(req.id) * 100, msg: this.msg});
 	}

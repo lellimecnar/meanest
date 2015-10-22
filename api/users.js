@@ -1,16 +1,13 @@
-import {controller, get, post, middleware} from 'express-decorators';
-import {authenticate} from '~/config/auth';
+import Auth, {authorize} from '~/config/auth';
+import {controller, get, post} from '~/config/api';
 import User from '~/db/user';
 
 @controller('/users')
 export default class Users {
-	@get('')
+	@get('/me')
+	@authorize
 	getUser(req, res, next) {
-		if (req.user) {
-			return res.json(req.user.cleanObj());
-		}
-
-		res.status(401).json({err: 'Not logged in'});
+		res.json(req.user.cleanObj());
 	}
 
 	@post('')
@@ -25,21 +22,33 @@ export default class Users {
 
 			user.save((err) => {
 				if (err) { return next(err); }
-				return res.json(user);
+
+				req.logIn(user, (err) => {
+					if (err) { return next(err); }
+					return res.json(user.cleanObj());
+				});
 			});
 		})
 	}
 
 	@post('/login')
-	@authenticate
 	login(req, res, next) {
-		res.json(req.user.cleanObj());
+		Auth.authenticate('local', (err, user, info) => {
+			if (err) { return next(err); }
+
+			if (!user) { return res.json(info); }
+
+			req.logIn(user, (err) => {
+				if (err) { return next(err); }
+				return res.json(user.cleanObj());
+			});
+		})(req, res, next);
 	}
 
 	@post('/logout')
 	logout(req, res, next) {
 		req.session.destroy((err) => {
-			if (err) { next(err); }
+			if (err) { return next(err); }
 			res.json({msg: 'Logged out'});
 		});
 	}
